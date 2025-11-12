@@ -1,0 +1,16 @@
+body { font-family: Arial, sans-serif; background:#f9f9f9; color:#333; margin:0; }
+.topbar { background:#111; color:#fff; padding:10px 16px; display:flex; justify-content:space-between; }
+.topbar a { color:#fff; margin-right:10px; text-decoration:none; }
+.center { max-width:900px; margin:20px auto; padding:10px; }
+input, select, button, textarea { display:block; margin:8px 0; padding:8px; width:100%; box-sizing:border-box; }
+button { background:#0066ff; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+button:hover { background:#0051cc; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.card { background:#fff; border:1px solid #ddd; border-radius:10px; padding:10px; }
+.card img { width:100%; border-radius:6px; }
+.row { display:flex; gap:10px; }
+.half { flex:1; }
+.badge { display:inline-block; padding:2px 6px; background:#eee; border-radius:4px; font-size:12px; }
+hr { margin:16px 0; }
+.small { font-size:12px; color:#666; }
+.alert { color:#b30000; }

@@ -1,0 +1,22 @@
+{
+  "name": "sarmelo-delivery-backend",
+  "version": "1.0.1",
+  "description": "Backend completo para Sarmelo Delivery - Teste Técnico Trackland 2025",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["delivery", "express", "sqlite", "api", "rest"],
+  "author": "Seu Nome",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7"
+  }
+}
