@@ -2,86 +2,190 @@ import { useEffect, useState } from "react";
 import api, { authHeader } from "../api";
 
 export default function PainelRestaurante() {
-  const [aba, setAba] = useState("pedidos"); // 'pedidos' | 'cardapio' | 'cupons'
-  const [erro, setErro] = useState("");
-
-  // ===== PEDIDOS =====
+  const [categorias, setCategorias] = useState([]);
+  const [itens, setItens] = useState([]);
   const [pedidos, setPedidos] = useState([]);
+  const [cupons, setCupons] = useState([]);
+  
+  const [formCat, setFormCat] = useState({ nome: "" });
+  const [formItem, setFormItem] = useState({
+    nome: "",
+    descricao: "",
+    preco: "",
+    categoria_id: "",
+    disponivel: true,
+    imagem_url: ""
+  });
+  const [formCupom, setFormCupom] = useState({
+    codigo: "",
+    descricao: "",
+    tipo: "percentual",
+    valor: "",
+    minimo: "",
+    ativo: true
+  });
+
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
+  const [abaAtiva, setAbaAtiva] = useState("pedidos");
+  
   const [itensPorPedido, setItensPorPedido] = useState({});
   const [abertos, setAbertos] = useState({});
-  const [loadingPedidos, setLoadingPedidos] = useState(false);
   const [loadingItens, setLoadingItens] = useState({});
 
-  // ===== CARDÁPIO =====
-  const [produtos, setProdutos] = useState([]);
-  const [loadingProds, setLoadingProds] = useState(false);
-  const [formProd, setFormProd] = useState({ id: null, nome: "", preco: "", descricao: "", ativo: true });
+  const steps = ["Recebido", "Em preparo", "Saiu para entrega", "Entregue"];
 
-  // ===== CUPONS =====
-  const [cupons, setCupons] = useState([]);
-  const [loadingCupons, setLoadingCupons] = useState(false);
-  const [formCupom, setFormCupom] = useState({ id: null, codigo: "", tipo: "percentual", valor: "" });
-
-  // ---------- HELPERS ----------
-  const fmt = (v) => `R$ ${Number(v || 0).toFixed(2)}`;
-  const corStatus = (s) => s === "Recebido" ? "#17a2b8" : s === "Em preparo" ? "#ffc107" : s === "Saiu para entrega" ? "#6f42c1" : s === "Entregue" ? "#28a745" : "#6c757d";
-
-  // tenta um endpoint e, se falhar, tenta o fallback
-  const tryGet = async (url1, url2) => {
-    try { return await api.get(url1, { headers: authHeader() }); }
-    catch { if (url2) return await api.get(url2, { headers: authHeader() }); throw new Error("GET falhou"); }
-  };
-  const tryPost = async (url1, url2, body) => {
-    try { return await api.post(url1, body, { headers: authHeader() }); }
-    catch { if (url2) return await api.post(url2, body, { headers: authHeader() }); throw new Error("POST falhou"); }
-  };
-  const tryPut = async (url1, url2, body) => {
-    try { return await api.put(url1, body, { headers: authHeader() }); }
-    catch { if (url2) return await api.put(url2, body, { headers: authHeader() }); throw new Error("PUT falhou"); }
-  };
-  const tryDel = async (url1, url2) => {
-    try { return await api.delete(url1, { headers: authHeader() }); }
-    catch { if (url2) return await api.delete(url2, { headers: authHeader() }); throw new Error("DELETE falhou"); }
-  };
-
-  // ---------- LOAD POR ABA ----------
   useEffect(() => {
-    setErro("");
-    if (aba === "pedidos") carregarPedidos();
-    if (aba === "cardapio") carregarProdutos();
-    if (aba === "cupons") carregarCupons();
-    // eslint-disable-next-line
-  }, [aba]);
+    load();
+  }, []);
 
-  // ---------- PEDIDOS ----------
-  const carregarPedidos = async () => {
-    setLoadingPedidos(true);
+  const load = async () => {
     try {
-      const r = await tryGet("/pedidos");
-      setPedidos(r.data || []);
-    } catch {
-      setErro("Faça login como restaurante para ver os pedidos");
-    } finally {
-      setLoadingPedidos(false);
+      const h = { headers: authHeader() };
+      const [resCat, resItens, resPedidos, resCupons] = await Promise.all([
+        api.get("/categorias", h),
+        api.get("/itens", h),
+        api.get("/pedidos", h),
+        api.get("/cupons", h)
+      ]);
+
+      setCategorias(resCat.data || []);
+      setItens(resItens.data || []);
+      setPedidos(resPedidos.data || []);
+      setCupons(resCupons.data || []);
+    } catch (err) {
+      setErro("Faça login como restaurante");
     }
   };
 
-  const toggleItens = async (id) => {
-    setAbertos((p) => ({ ...p, [id]: !p[id] }));
-    if (itensPorPedido[id]) return;
-
-    const pedido = pedidos.find((p) => p.id === id);
-    if (pedido && Array.isArray(pedido.itens) && pedido.itens.length) {
-      setItensPorPedido((prev) => ({ ...prev, [id]: pedido.itens }));
+  // CATEGORIAS
+  const salvarCategoria = async () => {
+    if (!formCat.nome) {
+      setErro("Digite o nome da categoria");
       return;
     }
+    try {
+      await api.post("/categorias", { nome: formCat.nome }, { headers: authHeader() });
+      setFormCat({ nome: "" });
+      setSucesso("✅ Categoria criada!");
+      load();
+      setTimeout(() => setSucesso(""), 2000);
+    } catch (err) {
+      setErro(err.response?.data?.erro || "Erro ao criar categoria");
+    }
+  };
+
+  const excluirCategoria = async (id) => {
+    if (!confirm("Excluir esta categoria?")) return;
+    try {
+      await api.delete("/categorias/" + id, { headers: authHeader() });
+      setSucesso("✅ Categoria excluída!");
+      load();
+      setTimeout(() => setSucesso(""), 2000);
+    } catch (err) {
+      setErro(err.response?.data?.erro || "Erro ao excluir categoria");
+    }
+  };
+
+  // ITENS
+  const salvarItem = async () => {
+    if (!formItem.nome || !formItem.preco) {
+      setErro("Preencha nome e preço");
+      return;
+    }
+    try {
+      const body = {
+        nome: formItem.nome,
+        descricao: formItem.descricao,
+        preco: Number(formItem.preco),
+        categoria_id: formItem.categoria_id ? Number(formItem.categoria_id) : null,
+        disponivel: !!formItem.disponivel,
+        imagem_url: formItem.imagem_url || null
+      };
+      await api.post("/itens", body, { headers: authHeader() });
+      setFormItem({
+        nome: "",
+        descricao: "",
+        preco: "",
+        categoria_id: "",
+        disponivel: true,
+        imagem_url: ""
+      });
+      setSucesso("✅ Item criado!");
+      load();
+      setTimeout(() => setSucesso(""), 2000);
+    } catch (err) {
+      setErro(err.response?.data?.erro || "Erro ao criar item");
+    }
+  };
+
+  const excluirItem = async (id) => {
+    if (!confirm("Excluir este item?")) return;
+    try {
+      await api.delete("/itens/" + id, { headers: authHeader() });
+      setSucesso("✅ Item excluído!");
+      load();
+      setTimeout(() => setSucesso(""), 2000);
+    } catch (err) {
+      setErro(err.response?.data?.erro || "Erro ao excluir item");
+    }
+  };
+
+  // CUPONS
+  const salvarCupom = async () => {
+    if (!formCupom.codigo || !formCupom.valor) {
+      setErro("Preencha código e valor");
+      return;
+    }
+    try {
+      const body = {
+        codigo: formCupom.codigo.toUpperCase(),
+        descricao: formCupom.descricao,
+        tipo: formCupom.tipo,
+        valor: Number(formCupom.valor),
+        minimo: Number(formCupom.minimo) || 0,
+        ativo: !!formCupom.ativo
+      };
+      await api.post("/cupons", body, { headers: authHeader() });
+      setFormCupom({
+        codigo: "",
+        descricao: "",
+        tipo: "percentual",
+        valor: "",
+        minimo: "",
+        ativo: true
+      });
+      setSucesso("✅ Cupom criado!");
+      load();
+      setTimeout(() => setSucesso(""), 2000);
+    } catch (err) {
+      setErro(err.response?.data?.erro || "Erro ao criar cupom");
+    }
+  };
+
+  const excluirCupom = async (id) => {
+    if (!confirm("Excluir este cupom?")) return;
+    try {
+      await api.delete("/cupons/" + id, { headers: authHeader() });
+      setSucesso("✅ Cupom excluído!");
+      load();
+      setTimeout(() => setSucesso(""), 2000);
+    } catch (err) {
+      setErro(err.response?.data?.erro || "Erro ao excluir cupom");
+    }
+  };
+
+  // PEDIDOS
+  const toggleItens = async (id) => {
+    setAbertos((prev) => ({ ...prev, [id]: !prev[id] }));
+    if (itensPorPedido[id]) return;
 
     try {
       setLoadingItens((p) => ({ ...p, [id]: true }));
-      const r = await tryGet(`/pedidos/${id}`);
-      const itens = r?.data?.itens || r?.data?.items || r?.data?.produtos || [];
+      const resp = await api.get(`/pedidos/${id}`, { headers: authHeader() });
+      const itens = resp?.data?.itens || [];
       setItensPorPedido((prev) => ({ ...prev, [id]: itens }));
-    } catch {
+    } catch (e) {
       setErro("Não foi possível carregar os itens do pedido");
     } finally {
       setLoadingItens((p) => ({ ...p, [id]: false }));
@@ -91,333 +195,318 @@ export default function PainelRestaurante() {
   const avancarStatus = async (id) => {
     try {
       const r = await api.post(`/pedidos/${id}/avancar`, {}, { headers: authHeader() });
-      setPedidos((prev) => prev.map((p) => (p.id === id ? { ...p, status: r.data?.status || p.status } : p)));
+      setPedidos((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, status: r.data?.status || p.status } : p))
+      );
+      setSucesso("✅ Status atualizado!");
+      setTimeout(() => setSucesso(""), 2000);
     } catch {
       setErro("Erro ao avançar status");
     }
   };
 
-  // ---------- CARDÁPIO ----------
-  const mapProduto = (x) => ({
-    id: x.id ?? x._id ?? x.produto_id ?? x.codigo,
-    nome: x.nome ?? x.titulo ?? x.descricao ?? "Item",
-    preco: Number(x.preco ?? x.preco_unit ?? x.valor ?? x.precoUnitario ?? 0),
-    descricao: x.descricao ?? x.detalhes ?? "",
-    ativo: x.ativo ?? (x.status === "ativo" || x.status === true) ?? true,
-  });
-
-  const carregarProdutos = async () => {
-    setLoadingProds(true);
-    try {
-      const r = await tryGet("/produtos", "/cardapio");
-      const lista = Array.isArray(r.data) ? r.data : (r.data?.itens || r.data?.produtos || []);
-      setProdutos((lista || []).map(mapProduto));
-    } catch {
-      setErro("Não foi possível carregar o cardápio");
-    } finally {
-      setLoadingProds(false);
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Recebido": return "#ffc107";
+      case "Em preparo": return "#17a2b8";
+      case "Saiu para entrega": return "#ff9800";
+      case "Entregue": return "#28a745";
+      default: return "#6c757d";
     }
   };
-
-  const salvarProduto = async (e) => {
-    e.preventDefault();
-    const body = {
-      nome: formProd.nome,
-      preco: Number(formProd.preco),
-      descricao: formProd.descricao,
-      ativo: !!formProd.ativo,
-    };
-
-    try {
-      if (formProd.id) {
-        await tryPut(`/produtos/${formProd.id}`, `/cardapio/${formProd.id}`, body);
-      } else {
-        await tryPost("/produtos", "/cardapio", body);
-      }
-      setFormProd({ id: null, nome: "", preco: "", descricao: "", ativo: true });
-      carregarProdutos();
-    } catch {
-      setErro("Não foi possível salvar o produto");
-    }
-  };
-
-  const editarProduto = (p) => setFormProd({ id: p.id, nome: p.nome, preco: p.preco, descricao: p.descricao, ativo: p.ativo });
-  const excluirProduto = async (id) => {
-    if (!confirm("Excluir este produto?")) return;
-    try {
-      await tryDel(`/produtos/${id}`, `/cardapio/${id}`);
-      carregarProdutos();
-    } catch {
-      setErro("Não foi possível excluir o produto");
-    }
-  };
-
-  // ---------- CUPONS ----------
-  const mapCupom = (c) => ({
-    id: c.id ?? c._id ?? c.cupom_id ?? c.codigo,
-    codigo: c.codigo ?? c.code ?? c.nome ?? "",
-    tipo: c.tipo ?? (c.percentual ? "percentual" : "fixo"),
-    valor: Number(c.valor ?? c.desconto ?? c.percentual ?? 0),
-  });
-
-  const carregarCupons = async () => {
-    setLoadingCupons(true);
-    try {
-      const r = await tryGet("/cupons", "/coupons");
-      const lista = Array.isArray(r.data) ? r.data : (r.data?.cupons || r.data?.items || []);
-      setCupons((lista || []).map(mapCupom));
-    } catch {
-      setErro("Não foi possível carregar os cupons");
-    } finally {
-      setLoadingCupons(false);
-    }
-  };
-
-  const salvarCupom = async (e) => {
-    e.preventDefault();
-    const body = {
-      codigo: formCupom.codigo,
-      tipo: formCupom.tipo, // 'percentual' | 'fixo'
-      valor: Number(formCupom.valor),
-    };
-
-    try {
-      if (formCupom.id) {
-        await tryPut(`/cupons/${formCupom.id}`, `/coupons/${formCupom.id}`, body);
-      } else {
-        await tryPost("/cupons", "/coupons", body);
-      }
-      setFormCupom({ id: null, codigo: "", tipo: "percentual", valor: "" });
-      carregarCupons();
-    } catch {
-      setErro("Não foi possível salvar o cupom");
-    }
-  };
-
-  const editarCupom = (c) => setFormCupom({ id: c.id, codigo: c.codigo, tipo: c.tipo, valor: c.valor });
-  const excluirCupom = async (id) => {
-    if (!confirm("Excluir este cupom?")) return;
-    try {
-      await tryDel(`/cupons/${id}`, `/coupons/${id}`);
-      carregarCupons();
-    } catch {
-      setErro("Não foi possível excluir o cupom");
-    }
-  };
-
-  // ---------- UI ----------
-  const Aba = ({ id, label, count }) => (
-    <button
-      onClick={() => setAba(id)}
-      className={aba === id ? "tab active" : "tab"}
-      style={{
-        padding: "10px 12px",
-        borderRadius: 8,
-        border: "none",
-        background: aba === id ? "#e7f3ff" : "#f5f5f5",
-        fontWeight: aba === id ? "bold" : "normal",
-        cursor: "pointer",
-      }}
-    >
-      {label} {typeof count === "number" ? `(${count})` : ""}
-    </button>
-  );
 
   return (
-    <div className="container">
-      <h2 style={{ marginBottom: 16 }}>🍕 Painel do Restaurante</h2>
+    <div className="center">
+      <h2>🍕 Painel do Restaurante</h2>
 
       {erro && (
-        <div className="alert" style={{ background: "#fee", border: "1px solid #fcc", padding: 12, borderRadius: 6, marginBottom: 10 }}>
+        <div className="alert" style={{ 
+          background: "#fee", 
+          border: "1px solid #fcc", 
+          padding: "10px", 
+          borderRadius: "6px",
+          marginBottom: "10px"
+        }}>
           ❌ {erro}
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
-        <Aba id="pedidos" label="📦 Pedidos" count={pedidos.length} />
-        <Aba id="cardapio" label="🍽️ Cardápio" />
-        <Aba id="cupons" label="🏷️ Cupons" />
+      {sucesso && (
+        <div style={{ 
+          background: "#efe", 
+          border: "1px solid #cfc", 
+          padding: "10px", 
+          borderRadius: "6px",
+          marginBottom: "10px",
+          color: "#060"
+        }}>
+          {sucesso}
+        </div>
+      )}
+
+      {/* ABAS */}
+      <div style={{ 
+        display: "flex", 
+        gap: "10px", 
+        marginBottom: "20px",
+        borderBottom: "2px solid #ddd"
+      }}>
+        <button
+          onClick={() => setAbaAtiva("pedidos")}
+          style={{
+            background: abaAtiva === "pedidos" ? "#0066ff" : "#f5f5f5",
+            color: abaAtiva === "pedidos" ? "#fff" : "#333",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "6px 6px 0 0",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+        >
+          📦 Pedidos ({pedidos.length})
+        </button>
+        
+        <button
+          onClick={() => setAbaAtiva("cardapio")}
+          style={{
+            background: abaAtiva === "cardapio" ? "#0066ff" : "#f5f5f5",
+            color: abaAtiva === "cardapio" ? "#fff" : "#333",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "6px 6px 0 0",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+        >
+          🍽️ Cardápio ({itens.length})
+        </button>
+        
+        <button
+          onClick={() => setAbaAtiva("cupons")}
+          style={{
+            background: abaAtiva === "cupons" ? "#0066ff" : "#f5f5f5",
+            color: abaAtiva === "cupons" ? "#fff" : "#333",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "6px 6px 0 0",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+        >
+          🎫 Cupons ({cupons.length})
+        </button>
       </div>
 
-      {/* ======= PEDIDOS ======= */}
-      {aba === "pedidos" && (
-        <>
-          <h3 style={{ marginBottom: 12 }}>📰 Pedidos Recentes</h3>
-          {loadingPedidos ? (
-            <p>Carregando...</p>
-          ) : pedidos.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "50px 20px", background: "#f9f9f9", borderRadius: 10 }}>
-              <p style={{ fontSize: 48, marginBottom: 10 }}>🗒️</p>
-              <p>Nenhum pedido no momento</p>
-            </div>
+      {/* ABA PEDIDOS */}
+      {abaAtiva === "pedidos" && (
+        <div>
+          <h3>📦 Pedidos Recentes</h3>
+          {pedidos.length === 0 ? (
+            <p className="small">Nenhum pedido ainda</p>
           ) : (
-            <div style={{ display: "grid", gap: 12 }}>
-              {pedidos.map((p) => (
-                <div key={p.id} className="card" style={{ position: "relative" }}>
-                  <span style={{ position: "absolute", right: 12, top: 12, background: corStatus(p.status), color: "#fff", borderRadius: 999, padding: "6px 10px", fontSize: 12 }}>
+            pedidos.map(p => (
+              <div key={p.id} className="card" style={{ marginBottom: "15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h4 style={{ margin: "0 0 10px 0" }}>Pedido #{p.id}</h4>
+                  <span style={{
+                    background: getStatusColor(p.status),
+                    color: "#fff",
+                    padding: "4px 12px",
+                    borderRadius: "20px",
+                    fontSize: "12px",
+                    fontWeight: "bold"
+                  }}>
                     {p.status}
                   </span>
+                </div>
 
-                  <h3 style={{ margin: 0, marginBottom: 4 }}>Pedido #{p.id}</h3>
-                  <p className="small" style={{ color: "#666", marginTop: 0, marginBottom: 8 }}>
-                    👤 Cliente: {p.cliente_nome || "Cliente Demo"}
+                <p className="small" style={{ marginBottom: "8px" }}>
+                  👤 Cliente: {p.user_id}
+                </p>
+                <p style={{ marginBottom: "8px" }}>
+                  📍 {p.endereco}
+                </p>
+
+                <div style={{ 
+                  display: "grid", 
+                  gridTemplateColumns: "1fr 1fr 1fr 1fr", 
+                  gap: "10px",
+                  marginBottom: "10px",
+                  fontSize: "14px"
+                }}>
+                  <div><strong>Subtotal:</strong><br />R$ {Number(p.subtotal).toFixed(2)}</div>
+                  <div><strong>Frete:</strong><br />R$ {Number(p.frete).toFixed(2)}</div>
+                  <div><strong>Desconto:</strong><br />- R$ {Number(p.desconto).toFixed(2)}</div>
+                  <div><strong>Total:</strong><br /><span style={{ fontSize: "16px", fontWeight: "bold", color: "#0066ff" }}>R$ {Number(p.total).toFixed(2)}</span></div>
+                </div>
+
+                {p.cupom_usado && (
+                  <p style={{ 
+                    background: "#fff3cd", 
+                    padding: "6px", 
+                    borderRadius: "4px",
+                    fontSize: "13px",
+                    marginBottom: "10px"
+                  }}>
+                    🎫 Cupom: <strong>{p.cupom_usado}</strong>
                   </p>
+                )}
 
-                  <p style={{ margin: "6px 0" }}>
-                    <span>📍</span> <span>{p.endereco}</span>
-                  </p>
+                <p className="small" style={{ color: "#666", marginBottom: "10px" }}>
+                  🕒 {new Date(p.criado_em).toLocaleString("pt-BR")}
+                </p>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, margin: "8px 0" }}>
-                    <div>Subtotal:<br /><strong>{fmt(p.subtotal)}</strong></div>
-                    <div>Frete:<br /><strong>{fmt(p.frete)}</strong></div>
-                    <div>Desconto:<br /><strong>- {fmt(p.desconto)}</strong></div>
-                    <div>Total:<br /><strong style={{ color: "#0066ff" }}>{fmt(p.total)}</strong></div>
-                  </div>
-
-                  {p.cupom_usado && (
-                    <div style={{ background: "#fff7e6", border: "1px solid #ffe2a8", padding: 8, borderRadius: 6, marginBottom: 8 }}>
-                      🏷️ Cupom usado: <strong>{p.cupom_usado}</strong>
-                    </div>
-                  )}
-
-                  <p className="small" style={{ color: "#999", marginBottom: 12 }}>
-                    🕒 {new Date(p.criado_em).toLocaleString("pt-BR")}
-                  </p>
-
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={() => toggleItens(p.id)} style={{ background: "#0d6efd" }}>
-                      {abertos[p.id] ? "✖️ Fechar itens" : "👀 Ver itens"}
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button onClick={() => toggleItens(p.id)} style={{ background: "#0d6efd" }}>
+                    {abertos[p.id] ? "✖️ Fechar itens" : "👀 Ver itens"}
+                  </button>
+                  {p.status !== "Entregue" && (
+                    <button onClick={() => avancarStatus(p.id)} style={{ background: "#28a745" }}>
+                      ➡️ Avançar status
                     </button>
-                    {p.status !== "Entregue" && (
-                      <button onClick={() => avancarStatus(p.id)} style={{ background: "#198754" }}>
-                        ✅ Avançar status
-                      </button>
+                  )}
+                </div>
+
+                {abertos[p.id] && (
+                  <div style={{ marginTop: "12px" }}>
+                    <h4 style={{ margin: "8px 0" }}>🛒 Itens do Pedido</h4>
+                    {loadingItens[p.id] ? (
+                      <p className="small">Carregando...</p>
+                    ) : (itensPorPedido[p.id] || []).length === 0 ? (
+                      <p className="small">Sem itens</p>
+                    ) : (
+                      <div style={{ display: "grid", gap: "8px" }}>
+                        {itensPorPedido[p.id].map((it, idx) => (
+                          <div key={idx} style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "12px",
+                            background: "#f9f9f9",
+                            borderRadius: "8px"
+                          }}>
+                            {it.imagem_url && (
+                              <img src={it.imagem_url} alt={it.nome} style={{
+                                width: "60px",
+                                height: "60px",
+                                objectFit: "cover",
+                                borderRadius: "6px"
+                              }} />
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: "bold" }}>{it.nome}</div>
+                              <div className="small">Qtd: {it.qtd} • R$ {Number(it.preco_unit).toFixed(2)}</div>
+                            </div>
+                            <div><strong>R$ {(it.qtd * it.preco_unit).toFixed(2)}</strong></div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-
-                  {abertos[p.id] && (
-                    <div style={{ marginTop: 12 }}>
-                      <h4 style={{ margin: "8px 0" }}>🛒 Itens do Pedido</h4>
-                      {loadingItens[p.id] ? (
-                        <p className="small">Carregando itens...</p>
-                      ) : (itensPorPedido[p.id] || []).length === 0 ? (
-                        <p className="small">Sem itens disponíveis</p>
-                      ) : (
-                        <div style={{ display: "grid", gap: 8 }}>
-                          {itensPorPedido[p.id].map((it, idx) => {
-                            const nome = it.nome || it.titulo || it.descricao || "Item";
-                            const qtd = it.qtd ?? it.quantidade ?? 1;
-                            const preco_unit = it.preco_unit ?? it.preco ?? it.valor_unit ?? 0;
-                            const img = it.imagem_url || it.imagem || it.foto;
-                            return (
-                              <div key={idx} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, background: "#f9f9f9", borderRadius: 8 }}>
-                                {img && <img src={img} alt={nome} style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 6, border: "1px solid #eee" }} />}
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontWeight: "bold" }}>{nome}</div>
-                                  <div className="small" style={{ color: "#666" }}>Quantidade: {qtd} • Preço unit: {fmt(preco_unit)}</div>
-                                </div>
-                                <div style={{ textAlign: "right" }}>
-                                  <div className="small" style={{ color: "#666" }}>Subtotal</div>
-                                  <div style={{ fontWeight: "bold" }}>{fmt(Number(qtd) * Number(preco_unit))}</div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                )}
+              </div>
+            ))
           )}
-        </>
+        </div>
       )}
 
-      {/* ======= CARDÁPIO ======= */}
-      {aba === "cardapio" && (
-        <>
-          <h3 style={{ marginBottom: 12 }}>🍽️ Cardápio</h3>
-
-          <form onSubmit={salvarProduto} style={{ display: "grid", gap: 8, marginBottom: 16 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 8 }}>
-              <input placeholder="Nome do produto" value={formProd.nome} onChange={(e) => setFormProd((f) => ({ ...f, nome: e.target.value }))} required />
-              <input type="number" step="0.01" placeholder="Preço" value={formProd.preco} onChange={(e) => setFormProd((f) => ({ ...f, preco: e.target.value }))} required />
+      {/* ABA CARDÁPIO */}
+      {abaAtiva === "cardapio" && (
+        <div>
+          <h3>📁 Categorias</h3>
+          <div className="row" style={{ marginBottom: "20px" }}>
+            <div style={{ flex: 2 }}>
+              <input placeholder="Nome da categoria" value={formCat.nome} onChange={e => setFormCat({ nome: e.target.value })} />
             </div>
-            <textarea placeholder="Descrição (opcional)" value={formProd.descricao} onChange={(e) => setFormProd((f) => ({ ...f, descricao: e.target.value }))} />
-            <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <input type="checkbox" checked={!!formProd.ativo} onChange={(e) => setFormProd((f) => ({ ...f, ativo: e.target.checked }))} />
-              Ativo
-            </label>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button type="submit" style={{ background: "#0d6efd" }}>{formProd.id ? "💾 Atualizar" : "➕ Adicionar"}</button>
-              {formProd.id && <button type="button" onClick={() => setFormProd({ id: null, nome: "", preco: "", descricao: "", ativo: true })}>Cancelar</button>}
+            <div style={{ flex: 1 }}>
+              <button onClick={salvarCategoria} style={{ width: "100%" }}>➕ Criar</button>
             </div>
-          </form>
+          </div>
+          <div className="grid" style={{ marginBottom: "30px" }}>
+            {categorias.map(c => (
+              <div key={c.id} className="card">
+                <b>{c.nome}</b>
+                <button onClick={() => excluirCategoria(c.id)} style={{ background: "#dc3545", marginTop: "8px" }}>
+                  🗑️ Excluir
+                </button>
+              </div>
+            ))}
+          </div>
 
-          {loadingProds ? (
-            <p>Carregando cardápio...</p>
-          ) : produtos.length === 0 ? (
-            <p>Nenhum item cadastrado.</p>
-          ) : (
-            <div style={{ display: "grid", gap: 8 }}>
-              {produtos.map((p) => (
-                <div key={p.id} className="card" style={{ display: "grid", gridTemplateColumns: "1fr auto auto", alignItems: "center", gap: 8 }}>
-                  <div>
-                    <div style={{ fontWeight: "bold" }}>{p.nome}</div>
-                    <div className="small" style={{ color: "#666" }}>{p.descricao}</div>
-                    <div className="small">Preço: <strong>{fmt(p.preco)}</strong> {p.ativo ? "• Ativo" : "• Inativo"}</div>
-                  </div>
-                  <button onClick={() => editarProduto(p)} style={{ background: "#ffc107" }}>✏️ Editar</button>
-                  <button onClick={() => excluirProduto(p.id)} style={{ background: "#dc3545" }}>🗑️ Excluir</button>
-                </div>
-              ))}
+          <hr />
+
+          <h3>🍽️ Itens</h3>
+          <div className="row" style={{ marginBottom: "20px" }}>
+            <div className="half">
+              <input placeholder="Nome *" value={formItem.nome} onChange={e => setFormItem({ ...formItem, nome: e.target.value })} />
+              <textarea placeholder="Descrição" value={formItem.descricao} onChange={e => setFormItem({ ...formItem, descricao: e.target.value })} rows={3} />
+              <input placeholder="Preço *" type="number" step="0.01" value={formItem.preco} onChange={e => setFormItem({ ...formItem, preco: e.target.value })} />
             </div>
-          )}
-        </>
-      )}
-
-      {/* ======= CUPONS ======= */}
-      {aba === "cupons" && (
-        <>
-          <h3 style={{ marginBottom: 12 }}>🏷️ Cupons</h3>
-
-          <form onSubmit={salvarCupom} style={{ display: "grid", gap: 8, marginBottom: 16 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 8 }}>
-              <input placeholder="Código do cupom" value={formCupom.codigo} onChange={(e) => setFormCupom((f) => ({ ...f, codigo: e.target.value.toUpperCase() }))} required />
-              <select value={formCupom.tipo} onChange={(e) => setFormCupom((f) => ({ ...f, tipo: e.target.value }))}>
-                <option value="percentual">% Desconto</option>
-                <option value="fixo">R$ Desconto</option>
+            <div className="half">
+              <input placeholder="URL da imagem" value={formItem.imagem_url} onChange={e => setFormItem({ ...formItem, imagem_url: e.target.value })} />
+              <select value={formItem.categoria_id} onChange={e => setFormItem({ ...formItem, categoria_id: e.target.value })}>
+                <option value="">Sem categoria</option>
+                {categorias.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
               </select>
-              <input type="number" step="0.01" placeholder={formCupom.tipo === "percentual" ? "% (0-100)" : "Valor (R$)"} value={formCupom.valor} onChange={(e) => setFormCupom((f) => ({ ...f, valor: e.target.value }))} required />
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+                <input type="checkbox" checked={formItem.disponivel} onChange={e => setFormItem({ ...formItem, disponivel: e.target.checked })} style={{ width: "auto", margin: 0 }} />
+                <span>Disponível</span>
+              </label>
+              <button onClick={salvarItem} style={{ marginTop: "10px", width: "100%" }}>➕ Criar Item</button>
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button type="submit" style={{ background: "#0d6efd" }}>{formCupom.id ? "💾 Atualizar" : "➕ Adicionar"}</button>
-              {formCupom.id && <button type="button" onClick={() => setFormCupom({ id: null, codigo: "", tipo: "percentual", valor: "" })}>Cancelar</button>}
-            </div>
-          </form>
+          </div>
+          <div className="grid">
+            {itens.map(i => (
+              <div key={i.id} className="card">
+                {i.imagem_url && <img src={i.imagem_url} alt={i.nome} style={{ width: "100%", borderRadius: "6px", marginBottom: "8px" }} />}
+                <h4 style={{ margin: "0 0 4px 0" }}>{i.nome}</h4>
+                <p className="small">{i.descricao}</p>
+                <p style={{ fontSize: "18px", fontWeight: "bold", color: "#28a745" }}>R$ {Number(i.preco).toFixed(2)}</p>
+                <button onClick={() => excluirItem(i.id)} style={{ background: "#dc3545" }}>🗑️ Excluir</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-          {loadingCupons ? (
-            <p>Carregando cupons...</p>
-          ) : cupons.length === 0 ? (
-            <p>Nenhum cupom cadastrado.</p>
-          ) : (
-            <div style={{ display: "grid", gap: 8 }}>
-              {cupons.map((c) => (
-                <div key={c.id} className="card" style={{ display: "grid", gridTemplateColumns: "1fr auto auto", alignItems: "center", gap: 8 }}>
-                  <div>
-                    <div style={{ fontWeight: "bold" }}>{c.codigo}</div>
-                    <div className="small" style={{ color: "#666" }}>
-                      {c.tipo === "percentual" ? `% ${c.valor}` : `R$ ${Number(c.valor).toFixed(2)}`}
-                    </div>
-                  </div>
-                  <button onClick={() => editarCupom(c)} style={{ background: "#ffc107" }}>✏️ Editar</button>
-                  <button onClick={() => excluirCupom(c.id)} style={{ background: "#dc3545" }}>🗑️ Excluir</button>
-                </div>
-              ))}
+      {/* ABA CUPONS */}
+      {abaAtiva === "cupons" && (
+        <div>
+          <h3>🎫 Cupons de Desconto</h3>
+          <div className="row" style={{ marginBottom: "20px" }}>
+            <div className="half">
+              <input placeholder="Código *" value={formCupom.codigo} onChange={e => setFormCupom({ ...formCupom, codigo: e.target.value.toUpperCase() })} style={{ textTransform: "uppercase" }} />
+              <input placeholder="Descrição" value={formCupom.descricao} onChange={e => setFormCupom({ ...formCupom, descricao: e.target.value })} />
             </div>
-          )}
-        </>
+            <div className="half">
+              <select value={formCupom.tipo} onChange={e => setFormCupom({ ...formCupom, tipo: e.target.value })}>
+                <option value="percentual">Percentual (%)</option>
+                <option value="fixo">Valor Fixo (R$)</option>
+              </select>
+              <input placeholder={formCupom.tipo === "percentual" ? "Valor (%)" : "Valor (R$)"} type="number" step="0.01" value={formCupom.valor} onChange={e => setFormCupom({ ...formCupom, valor: e.target.value })} />
+              <input placeholder="Mínimo" type="number" step="0.01" value={formCupom.minimo} onChange={e => setFormCupom({ ...formCupom, minimo: e.target.value })} />
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+                <input type="checkbox" checked={formCupom.ativo} onChange={e => setFormCupom({ ...formCupom, ativo: e.target.checked })} style={{ width: "auto", margin: 0 }} />
+                <span>Ativo</span>
+              </label>
+              <button onClick={salvarCupom} style={{ marginTop: "10px", width: "100%", background: "#ff9800" }}>➕ Criar Cupom</button>
+            </div>
+          </div>
+          <div className="grid">
+            {cupons.map(c => (
+              <div key={c.id} className="card" style={{ border: c.ativo ? "2px solid #ff9800" : "1px solid #ddd" }}>
+                <h4 style={{ margin: "0 0 8px 0" }}>{c.codigo}</h4>
+                <p className="small">{c.descricao}</p>
+                <div><strong>Desconto:</strong> {c.tipo === "percentual" ? `${c.valor}%` : `R$ ${Number(c.valor).toFixed(2)}`}</div>
+                <div><strong>Mínimo:</strong> R$ {Number(c.minimo).toFixed(2)}</div>
+                <p className="badge" style={{ background: c.ativo ? "#28a745" : "#dc3545", color: "#fff", display: "inline-block", marginTop: "8px" }}>
+                  {c.ativo ? "Ativo" : "Inativo"}
+                </p>
+                <button onClick={() => excluirCupom(c.id)} style={{ background: "#dc3545", marginTop: "8px" }}>🗑️ Excluir</button>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

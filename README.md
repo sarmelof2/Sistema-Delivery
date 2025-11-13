@@ -1,285 +1,248 @@
 # 🍕 Sarmelo Delivery
 
-> Sistema completo de delivery com cardápio digital, gestão de pedidos e cálculo inteligente de frete.
+Sistema completo de delivery desenvolvido para o **Teste Técnico Trackland 2025**.
 
-[![Node.js](https://img.shields.io/badge/Node.js-v16+-green.svg)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
-[![SQLite](https://img.shields.io/badge/SQLite-3-lightgrey.svg)](https://www.sqlite.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+## 📌 O que o sistema faz
 
-## 📋 Sobre o Projeto
+- Cliente visualiza o cardápio e faz pedidos
+- Sistema calcula frete automaticamente baseado na distância real
+- Cliente pode usar cupons de desconto
+- Restaurante gerencia pedidos e avança os status
+- Acompanhamento em tempo real do status do pedido
 
-Sistema full-stack desenvolvido para o **Teste Técnico Trackland 2025**, que permite:
+## 🛠️ Tecnologias
 
-- 🔐 Autenticação com dois perfis (Cliente e Restaurante)
-- 📱 Cardápio digital interativo com imagens
-- 🛒 Carrinho de compras inteligente
-- 📍 Integração com ViaCEP para preenchimento automático de endereço
-- 🗺️ Cálculo de frete baseado em distância real (Positionstack API)
-- 🎫 Sistema completo de cupons de desconto
-- 📊 Painel administrativo para restaurantes
-- 🚚 Acompanhamento de pedidos em tempo real
+**Backend:**
+- Node.js + Express
+- SQLite (banco de dados local)
+- JWT para autenticação
+- bcryptjs para senhas
+- Axios para APIs externas
 
-## 🚀 Tecnologias Utilizadas
+**Frontend:**
+- React 18
+- Vite
+- React Router
+- CSS3
 
-### Backend
-- **Node.js** + Express
-- **SQLite** (banco de dados)
-- **JWT** para autenticação
-- **bcryptjs** para criptografia de senhas
-- **axios** para requisições HTTP
-- **dotenv** para variáveis de ambiente
+**APIs Externas:**
+- **ViaCEP** - busca endereço por CEP
+- **Positionstack** - geocoding e cálculo de distância
 
-### Frontend
-- **React** 18.2
-- **Vite** (bundler ultra-rápido)
-- **React Router** para navegação
-- **CSS3** (design responsivo)
-
-### APIs Externas
-- **ViaCEP** - Busca de endereços por CEP
-- **Positionstack** - Geocoding e cálculo de distância
-
-## 📦 Instalação
+## ⚙️ Como rodar
 
 ### Pré-requisitos
-- Node.js v16 ou superior
-- NPM ou Yarn
+- Node.js 16 ou superior instalado
+- NPM (vem junto com o Node.js)
 
-### Passo 1: Clone o repositório
+### Instalação
+
+**1. Clone o repositório**
 ```bash
-git clone <url-do-repositorio>
-cd sarmelo-delivery
+git clone <url-do-seu-repositorio>
+cd sarmelo-delivery-final-v3
 ```
 
-### Passo 2: Configurar o Backend
+**2. Backend**
 ```bash
 cd backend
 npm install
 ```
 
-Crie um arquivo `.env` na pasta `backend`:
+Crie o arquivo `.env` na pasta `backend`:
 ```env
 PORT=3000
-JWT_SECRET=seu_secret_aqui
+JWT_SECRET=sarmelo_delivery_secret_2025
 POSITIONSTACK_KEY=a5f6d1767b6cf0c69efdf4d9e4399510
 ```
 
-### Passo 3: Configurar o Frontend
+**3. Frontend**
 ```bash
 cd frontend
 npm install
 ```
 
-Crie um arquivo `.env` na pasta `frontend`:
-```env
-VITE_API_URL=http://localhost:3000
-```
+### Executar
 
-## ▶️ Como Executar
+Abra **dois terminais**:
 
-### Iniciar o Backend (Terminal 1)
+**Terminal 1 - Backend:**
 ```bash
 cd backend
 npm start
 ```
-O servidor estará rodando em `http://localhost:3000`
+Aguarde aparecer: "Servidor rodando na porta 3000"
 
-### Iniciar o Frontend (Terminal 2)
+**Terminal 2 - Frontend:**
 ```bash
 cd frontend
 npm run dev
 ```
-O aplicativo estará disponível em `http://localhost:5173`
 
-## 👥 Usuários Pré-cadastrados
+Acesse: **http://localhost:5173**
 
-Para testar o sistema, use:
-
-**Restaurante:**
-- Email: `rest@demo.com`
-- Senha: `123`
+## 👤 Contas para teste
 
 **Cliente:**
 - Email: `cli@demo.com`
 - Senha: `123`
 
-## 🎫 Cupons Disponíveis
+**Restaurante:**
+- Email: `rest@demo.com`
+- Senha: `123`
 
-Teste o sistema de cupons com os códigos:
+## 🎫 Cupons disponíveis
 
-| Código | Descrição | Tipo | Valor | Mínimo |
-|--------|-----------|------|-------|--------|
-| `PRIMEIRACOMPRA` | 10% de desconto | Percentual | 10% | R$ 30,00 |
-| `FRETEGRATIS` | Frete grátis | Fixo | R$ 0,00 | R$ 50,00 |
-| `DESCONTO5` | R$5 de desconto | Fixo | R$ 5,00 | R$ 20,00 |
+| Código | Descrição | Desconto | Mínimo |
+|--------|-----------|----------|---------|
+| `PRIMEIRACOMPRA` | 10% de desconto | 10% | R$ 30,00 |
+| `FRETEGRATIS` | Zera o valor do frete | Frete grátis | R$ 50,00 |
+| `DESCONTO5` | Desconto fixo | R$ 5,00 | R$ 20,00 |
 
-## 📱 Funcionalidades
+## ✅ Funcionalidades implementadas
 
-### Para Clientes
+### Obrigatórias (todas completas)
+- ✅ Autenticação com dois perfis (Cliente e Restaurante)
+- ✅ CRUD completo de categorias e itens do cardápio
+- ✅ Visualização pública do cardápio
+- ✅ Integração com ViaCEP para buscar endereço
+- ✅ Cálculo de frete por distância usando Positionstack
+- ✅ Sistema de pedidos completo
+- ✅ Status do pedido: Recebido → Em preparo → Saiu para entrega → Entregue
+- ✅ Histórico de pedidos para cliente e restaurante
 
-✅ **Navegar pelo Cardápio**
-- Visualização de produtos por categoria
-- Imagens, descrições e preços
-- Filtros e busca
+### Diferenciais implementados
+- ✅ Sistema completo de cupons de desconto (percentual e fixo)
+- ✅ Taxas dinâmicas de frete baseadas em distância real
+- ✅ Interface moderna e responsiva
+- ✅ Animações e feedback visual
+- ✅ Validações robustas
 
-✅ **Fazer Pedidos**
-- Adicionar itens ao carrinho
-- Alterar quantidades
-- Preencher endereço com ViaCEP
-- Calcular frete automaticamente
-- Aplicar cupons de desconto
-- Finalizar pedido
+## 📱 Como usar (fluxo completo)
 
-✅ **Acompanhar Pedidos**
-- Ver histórico completo
-- Status em tempo real
-- Detalhes de cada pedido
+### Como Cliente:
+1. Faça login com `cli@demo.com / 123`
+2. Navegue pelo cardápio e adicione itens ao carrinho
+3. Vá para o checkout
+4. Preencha seu CEP (use um CEP real do Brasil)
+5. O sistema busca seu endereço automaticamente
+6. Complete o número do endereço
+7. Clique em "Calcular Frete" (distância é calculada em tempo real)
+8. Opcional: aplique um cupom de desconto
+9. Finalize o pedido
+10. Acompanhe o status em "Meus Pedidos"
 
-### Para Restaurantes
+### Como Restaurante:
+1. Faça login com `rest@demo.com / 123`
+2. Veja todos os pedidos recebidos
+3. Clique em "Ver itens" para ver detalhes
+4. Clique em "Avançar status" para mudar: Recebido → Em preparo → Saiu para entrega → Entregue
+5. O cliente vê a atualização em tempo real
 
-✅ **Gerenciar Cardápio**
-- CRUD completo de categorias
-- CRUD completo de itens
-- Upload de imagens (URL)
-- Controle de disponibilidade
-
-✅ **Gerenciar Cupons**
-- Criar cupons percentuais ou fixos
-- Definir valor mínimo
-- Ativar/desativar cupons
-
-✅ **Gerenciar Pedidos**
-- Visualizar todos os pedidos
-- Filtrar por status
-- Avançar status: Recebido → Em preparo → Saiu para entrega → Entregue
-- Ver detalhes completos
-
-## 🗂️ Estrutura do Projeto
+## 🗂️ Estrutura do projeto
 
 ```
-sarmelo-delivery/
-│
+sarmelo-delivery-final-v3/
 ├── backend/
-│   ├── server.js           # Servidor Express
-│   ├── package.json        # Dependências do backend
-│   ├── .env                # Variáveis de ambiente
-│   └── data.sqlite         # Banco de dados (gerado automaticamente)
+│   ├── server.js          # API REST completa
+│   ├── package.json       # Dependências
+│   ├── .env               # Configurações
+│   └── data.sqlite        # Banco (gerado automaticamente)
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/          # Páginas da aplicação
-│   │   │   ├── Menu.jsx
-│   │   │   ├── Carrinho.jsx
-│   │   │   ├── Checkout.jsx
-│   │   │   ├── MeusPedidos.jsx
-│   │   │   ├── PainelRestaurante.jsx
-│   │   │   ├── Login.jsx
-│   │   │   └── Register.jsx
-│   │   ├── api.js          # Configuração Axios
-│   │   ├── cart.js         # Lógica do carrinho
-│   │   ├── main.jsx        # Entry point
-│   │   └── index.css       # Estilos globais
-│   ├── package.json
-│   └── vite.config.js
+│   │   ├── pages/         # Páginas da aplicação
+│   │   ├── api.js         # Config do Axios
+│   │   ├── cart.js        # Lógica do carrinho
+│   │   └── main.jsx       # Entrada da aplicação
+│   └── package.json
 │
 └── README.md
 ```
 
-## 🔌 API Endpoints
+## 🔌 Principais endpoints da API
 
-### Autenticação
-- `POST /auth/register` - Cadastrar usuário
-- `POST /auth/login` - Fazer login
-- `GET /me` - Dados do usuário logado
+**Autenticação:**
+- `POST /auth/register` - Cadastrar
+- `POST /auth/login` - Login
 
-### Cardápio (Público)
-- `GET /menu` - Listar itens disponíveis
+**Cardápio:**
+- `GET /menu` - Listar itens (público)
 
-### CEP e Frete
-- `GET /viacep/:cep` - Buscar endereço por CEP
-- `POST /frete` - Calcular frete por distância
+**CEP e Frete:**
+- `GET /viacep/:cep` - Buscar endereço
+- `POST /frete` - Calcular frete
 
-### Cupons
-- `POST /cupons/validar` - Validar cupom de desconto
-- `GET /cupons` - Listar cupons (restaurante)
-- `POST /cupons` - Criar cupom (restaurante)
-- `DELETE /cupons/:id` - Excluir cupom (restaurante)
+**Cupons:**
+- `POST /cupons/validar` - Validar cupom
 
-### Pedidos (Cliente)
+**Pedidos (Cliente):**
 - `POST /pedidos` - Criar pedido
-- `GET /pedidos/meus` - Listar meus pedidos
-- `GET /pedidos/:id` - Detalhes do pedido
+- `GET /pedidos/meus` - Meus pedidos
+- `GET /pedidos/:id` - Detalhes
 
-### Pedidos (Restaurante)
-- `GET /pedidos` - Listar todos os pedidos
-- `POST /pedidos/:id/avancar` - Avançar status do pedido
+**Pedidos (Restaurante):**
+- `GET /pedidos` - Todos os pedidos
+- `POST /pedidos/:id/avancar` - Avançar status
 
-### Categorias (Restaurante)
-- `GET /categorias` - Listar categorias
-- `POST /categorias` - Criar categoria
-- `PUT /categorias/:id` - Editar categoria
-- `DELETE /categorias/:id` - Excluir categoria
+## 💡 Decisões técnicas
 
-### Itens (Restaurante)
-- `GET /itens` - Listar itens
-- `POST /itens` - Criar item
-- `PUT /itens/:id` - Editar item
-- `DELETE /itens/:id` - Excluir item
+**Por que SQLite?**
+- Zero configuração necessária
+- Arquivo único, fácil de transportar
+- Perfeito para desenvolvimento e MVP
+- Pode ser migrado facilmente para PostgreSQL/MySQL
 
-## 🎨 Decisões Técnicas
+**Por que Positionstack?**
+- Alternativa gratuita ao Google Maps/Mapbox
+- 25.000 requisições/mês no plano free
+- Não exige cartão de crédito
+- Funciona bem para geocoding básico
 
-### Por que SQLite?
-- ✅ Zero configuração
-- ✅ Portável (arquivo único)
-- ✅ Perfeito para desenvolvimento e testes
-- ✅ Fácil migração para PostgreSQL/MySQL em produção
+**Cálculo de frete:**
+1. Positionstack converte endereços em coordenadas (latitude/longitude)
+2. Fórmula Haversine calcula distância em linha reta
+3. Fórmula aplicada: R$ 5,00 (taxa base) + R$ 1,00 por km
 
-### Por que Positionstack?
-- ✅ API gratuita sem cartão de crédito
-- ✅ 25.000 requisições/mês no plano free
-- ✅ Alternativa viável ao Google Maps/Mapbox
-- ✅ Documentação simples e clara
+**Sistema de cupons:**
+- Suporta desconto percentual ou valor fixo
+- Validação de valor mínimo do pedido
+- Desconto nunca excede o valor do subtotal
+- Cupom é registrado no pedido
 
-### Por que Vite?
-- ✅ 10-100x mais rápido que Webpack
-- ✅ Hot Module Replacement instantâneo
-- ✅ Build otimizado para produção
-- ✅ Configuração mínima
+## 🐛 Troubleshooting
 
-### Arquitetura de Autenticação
-- JWT com expiração de 7 dias
-- Senhas criptografadas com bcrypt (8 rounds)
-- Middleware de autorização por perfil
-- Tokens armazenados no localStorage (frontend)
+**Backend não inicia:**
+- Verifique se a porta 3000 está livre
+- Confirme que o arquivo `.env` foi criado
+- Rode `npm install` novamente
 
-### Sistema de Frete
-1. Cliente insere CEP
-2. ViaCEP retorna endereço completo
-3. Positionstack converte endereço em coordenadas (lat/lon)
-4. Fórmula Haversine calcula distância em km
-5. Frete = R$ 5,00 (base) + R$ 1,00/km
+**Frontend não conecta:**
+- Certifique-se que o backend está rodando
+- Verifique se não há erro no terminal do backend
+- Limpe o cache do navegador (Ctrl + Shift + R)
 
-## 🐛 Possíveis Melhorias Futuras
+**Erro ao calcular frete:**
+- Use CEPs válidos do Brasil (ex: 79002-073)
+- Verifique sua conexão com a internet
+- A API Positionstack tem limite de 25k requests/mês
 
-- [ ] Testes automatizados (Jest + React Testing Library)
-- [ ] Upload real de imagens (Cloudinary/AWS S3)
-- [ ] WebSockets para atualização em tempo real
-- [ ] Notificações push
-- [ ] Painel de entregadores com mapa
-- [ ] Sistema de avaliações e comentários
-- [ ] Histórico de uso de cupons
-- [ ] Relatórios e dashboards
-- [ ] Integração com gateway de pagamento
-- [ ] Modo dark
-- [ ] PWA (Progressive Web App)
+## 🚀 Melhorias futuras
 
-## 📝 Licença
+Se fosse continuar o desenvolvimento, implementaria:
+- Sistema de avaliações e comentários
+- Upload real de imagens (Cloudinary/AWS S3)
+- WebSockets para atualização em tempo real
+- Painel de entregadores com mapa
+- Notificações push
+- Testes automatizados
+- Integração com gateway de pagamento
+- Relatórios e dashboards
 
-Este projeto está sob a licença MIT.
+## 📄 Licença
 
-## 👨‍💻 Autor
+MIT
 
-Marcelo Roberto Fuhr de Campos
+---
 
-Desenvolvido para o **Teste Técnico Trackland 2025**
+**Desenvolvido para o Teste Técnico Trackland 2025**
