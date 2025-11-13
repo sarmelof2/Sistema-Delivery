@@ -96,8 +96,8 @@ Acesse: **http://localhost:5173**
 | Código | Descrição | Desconto | Mínimo |
 |--------|-----------|----------|---------|
 | `PRIMEIRACOMPRA` | 10% de desconto | 10% | R$ 30,00 |
-| `FRETEGRATIS` | Zera o valor do frete | Frete grátis | R$ 50,00 |
-| `DESCONTO5` | Desconto fixo | R$ 5,00 | R$ 20,00 |
+| `CLIENTE` | Desconto de R$ 30,00 | MÍNIMO DE R$ 80,00 |
+| `TESTE` | Desconto de R$ 25,00 | Mínimo de R$ 50,00 |
 
 ## ✅ Funcionalidades implementadas
 
