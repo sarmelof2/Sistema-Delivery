@@ -4,149 +4,206 @@ Sistema completo de delivery desenvolvido para o **Teste Técnico Trackland 2025
 
 ## 📌 O que o sistema faz
 
-- Cliente visualiza o cardápio e faz pedidos
-- Sistema calcula frete automaticamente baseado na distância real
-- Cliente pode usar cupons de desconto
-- Restaurante gerencia pedidos e avança os status
-- Acompanhamento em tempo real do status do pedido
+- Cliente visualiza o cardápio e faz pedidos  
+- Sistema calcula frete automaticamente baseado na distância real  
+- Cliente pode usar cupons de desconto  
+- Restaurante gerencia pedidos e avança os status  
+- Acompanhamento em tempo real do status do pedido  
+
+---
 
 ## 🛠️ Tecnologias
 
 **Backend:**
-- Node.js + Express
-- SQLite (banco de dados local)
-- JWT para autenticação
-- bcryptjs para senhas
-- Axios para APIs externas
+- Node.js + Express  
+- SQLite (banco de dados local)  
+- JWT para autenticação  
+- bcryptjs para senhas  
+- Axios para consumo de APIs externas  
 
 **Frontend:**
-- React 18
-- Vite
-- React Router
-- CSS3
+- React 18  
+- Vite  
+- React Router  
+- Axios para comunicação com a API  
+- CSS3  
 
 **APIs Externas:**
-- **ViaCEP** - busca endereço por CEP
-- **Positionstack** - geocoding e cálculo de distância
+- **ViaCEP** – busca endereço por CEP  
+- **Positionstack** – geocoding (endereço → latitude/longitude)  
+- Distância calculada no backend usando **fórmula de Haversine**  
+
+---
 
 ## ⚙️ Como rodar
 
 ### Pré-requisitos
-- Node.js 16 ou superior instalado
+- Node.js 16 ou superior instalado  
 - NPM (vem junto com o Node.js)
 
 ### Instalação
 
 **1. Clone o repositório**
 ```bash
-git clone <url-do-seu-repositorio>
-cd sarmelo-delivery-final-v3
-```
+git clone https://github.com/sarmelof2/Sistema-Delivery.git
+cd Sistema-Delivery
 
-**2. Backend**
-```bash
+------------------------------------------------------------------------------
+
+2. Backend
+
 cd backend
 npm install
-```
 
-Crie o arquivo `.env` na pasta `backend`:
-```env
+------------------------------------------------------------------------------
+
+Crie o arquivo .env na pasta backend:
+
 PORT=3000
 JWT_SECRET=sarmelo_delivery_secret_2025
 POSITIONSTACK_KEY=a5f6d1767b6cf0c69efdf4d9e4399510
-```
 
-**3. Frontend**
-```bash
+-----------------------------------------------------------------------------
+
+3. Frontend
+(na raiz do projeto, em outro terminal ou após voltar com cd ..)
+
 cd frontend
 npm install
-```
 
-### Executar
+------------------------------------------------------------------------------
 
-Abra **dois terminais**:
+▶️ Executar
 
-**Terminal 1 - Backend:**
-```bash
+Abra dois terminais na pasta raiz do projeto (Sistema-Delivery):
+
+Terminal 1 – Backend:
+
 cd backend
 npm start
-```
-Aguarde aparecer: "Servidor rodando na porta 3000"
 
-**Terminal 2 - Frontend:**
-```bash
+------------------------------------------------------------------------------
+
+Aguarde aparecer: Servidor rodando na porta 3000
+
+Terminal 2 – Frontend:
+
 cd frontend
 npm run dev
-```
 
-Acesse: **http://localhost:5173**
 
-## 👤 Contas para teste
+Acesse: http://localhost:5173
 
-**Cliente:**
-- Email: `cli@demo.com`
-- Senha: `123`
+-----------------------------------------------------------------------------
 
-**Restaurante:**
-- Email: `rest@demo.com`
-- Senha: `123`
+👤 Contas para teste
 
-## 🎫 Cupons disponíveis
+Cliente:
 
-| Código | Descrição | Desconto | Mínimo |
-|--------|-----------|----------|---------|
-| `PRIMEIRACOMPRA` | 10% de desconto | 10% | R$ 30,00 |
-| `FRETEGRATIS` | Zera o valor do frete | Frete grátis | R$ 50,00 |
-| `DESCONTO5` | Desconto fixo | R$ 5,00 | R$ 20,00 |
+Email: cli@demo.com
 
-## ✅ Funcionalidades implementadas
+Senha: 123
 
-### Obrigatórias (todas completas)
-- ✅ Autenticação com dois perfis (Cliente e Restaurante)
-- ✅ CRUD completo de categorias e itens do cardápio
-- ✅ Visualização pública do cardápio
-- ✅ Integração com ViaCEP para buscar endereço
-- ✅ Cálculo de frete por distância usando Positionstack
-- ✅ Sistema de pedidos completo
-- ✅ Status do pedido: Recebido → Em preparo → Saiu para entrega → Entregue
-- ✅ Histórico de pedidos para cliente e restaurante
+Restaurante:
 
-### Diferenciais implementados
-- ✅ Sistema completo de cupons de desconto (percentual e fixo)
-- ✅ Taxas dinâmicas de frete baseadas em distância real
-- ✅ Interface moderna e responsiva
-- ✅ Animações e feedback visual
-- ✅ Validações robustas
+Email: rest@demo.com
 
-## 📱 Como usar (fluxo completo)
+Senha: 123
 
-### Como Cliente:
-1. Faça login com `cli@demo.com / 123`
-2. Navegue pelo cardápio e adicione itens ao carrinho
-3. Vá para o checkout
-4. Preencha seu CEP (use um CEP real do Brasil)
-5. O sistema busca seu endereço automaticamente
-6. Complete o número do endereço
-7. Clique em "Calcular Frete" (distância é calculada em tempo real)
-8. Opcional: aplique um cupom de desconto
-9. Finalize o pedido
-10. Acompanhe o status em "Meus Pedidos"
+----------------------------------------------------------------------------
 
-### Como Restaurante:
-1. Faça login com `rest@demo.com / 123`
-2. Veja todos os pedidos recebidos
-3. Clique em "Ver itens" para ver detalhes
-4. Clique em "Avançar status" para mudar: Recebido → Em preparo → Saiu para entrega → Entregue
-5. O cliente vê a atualização em tempo real
+🎫 Cupons disponíveis
 
-## 🗂️ Estrutura do projeto
+| Código           | Descrição             | Desconto     | Mínimo   |
+| ---------------- | --------------------- | ------------ | -------- |
+| `PRIMEIRACOMPRA` | 10% de desconto       | 10%          | R$ 30,00 |
+| `TESTE`          | desconto fixo         | R$ 30,00     | R$ 80,00 |
+| `CLIENTE`        | Desconto fixo         | R$ 25,00     | R$ 50,00 |
 
-```
-sarmelo-delivery-final-v3/
+----------------------------------------------------------------------------
+
+✅ Funcionalidades implementadas
+Obrigatórias (todas completas)
+
+✅ Autenticação com dois perfis (Cliente e Restaurante)
+
+✅ CRUD completo de categorias e itens do cardápio
+
+✅ Visualização pública do cardápio
+
+✅ Integração com ViaCEP para buscar endereço
+
+✅ Cálculo de frete por distância usando Positionstack + Haversine
+
+✅ Sistema de pedidos completo
+
+✅ Status do pedido: Recebido → Em preparo → Saiu para entrega → Entregue
+
+✅ Histórico de pedidos para cliente e restaurante
+
+----------------------------------------------------------------------------
+
+Diferenciais implementados
+
+✅ Sistema completo de cupons de desconto (percentual e fixo)
+
+✅ Taxas dinâmicas de frete baseadas em distância real
+
+✅ Interface moderna e responsiva
+
+✅ Animações e feedback visual
+
+✅ Validações robustas de formulário e regras de negócio
+
+----------------------------------------------------------------------------
+
+📱 Como usar (fluxo completo)
+Como Cliente:
+
+Faça login com cli@demo.com / 123
+
+Navegue pelo cardápio e adicione itens ao carrinho
+
+Vá para o checkout
+
+Preencha seu CEP (use um CEP real do Brasil)
+
+O sistema busca seu endereço automaticamente via ViaCEP
+
+Complete o número do endereço
+
+Clique em “Calcular Frete” (distância é calculada em tempo real)
+
+(Opcional) aplique um cupom de desconto
+
+Finalize o pedido
+
+Acompanhe o status em “Meus Pedidos”
+
+----------------------------------------------------------------------------
+
+Como Restaurante:
+
+Faça login com rest@demo.com / 123
+
+Veja todos os pedidos recebidos na aba Pedidos
+
+Clique em “Ver itens” para ver os detalhes do pedido
+
+Clique em “Avançar status” para mudar:
+
+Recebido → Em preparo → Saiu para entrega → Entregue
+
+O cliente vê a atualização em tempo real na tela de pedidos dele
+
+----------------------------------------------------------------------------
+
+🗂️ Estrutura do projeto
+Sistema-Delivery/
 ├── backend/
 │   ├── server.js          # API REST completa
 │   ├── package.json       # Dependências
-│   ├── .env               # Configurações
+│   ├── .env               # Configurações sensíveis
 │   └── data.sqlite        # Banco (gerado automaticamente)
 │
 ├── frontend/
@@ -158,91 +215,141 @@ sarmelo-delivery-final-v3/
 │   └── package.json
 │
 └── README.md
-```
 
-## 🔌 Principais endpoints da API
+----------------------------------------------------------------------------
 
-**Autenticação:**
-- `POST /auth/register` - Cadastrar
-- `POST /auth/login` - Login
+🔌 Principais endpoints da API (resumo)
 
-**Cardápio:**
-- `GET /menu` - Listar itens (público)
+Autenticação:
 
-**CEP e Frete:**
-- `GET /viacep/:cep` - Buscar endereço
-- `POST /frete` - Calcular frete
+POST /auth/register – Cadastrar usuário
 
-**Cupons:**
-- `POST /cupons/validar` - Validar cupom
+POST /auth/login – Login
 
-**Pedidos (Cliente):**
-- `POST /pedidos` - Criar pedido
-- `GET /pedidos/meus` - Meus pedidos
-- `GET /pedidos/:id` - Detalhes
+Cardápio:
 
-**Pedidos (Restaurante):**
-- `GET /pedidos` - Todos os pedidos
-- `POST /pedidos/:id/avancar` - Avançar status
+GET /menu – Listar itens (público)
 
-## 💡 Decisões técnicas
+CEP e Frete (internos ao backend):
 
-**Por que SQLite?**
-- Zero configuração necessária
-- Arquivo único, fácil de transportar
-- Perfeito para desenvolvimento e MVP
-- Pode ser migrado facilmente para PostgreSQL/MySQL
+Consumo da API ViaCEP para /ws/:cep/json
 
-**Por que Positionstack?**
-- Alternativa gratuita ao Google Maps/Mapbox
-- 25.000 requisições/mês no plano free
-- Não exige cartão de crédito
-- Funciona bem para geocoding básico
+POST /frete – Calcular frete a partir do endereço
 
-**Cálculo de frete:**
-1. Positionstack converte endereços em coordenadas (latitude/longitude)
-2. Fórmula Haversine calcula distância em linha reta
-3. Fórmula aplicada: R$ 5,00 (taxa base) + R$ 1,00 por km
+Cupons:
 
-**Sistema de cupons:**
-- Suporta desconto percentual ou valor fixo
-- Validação de valor mínimo do pedido
-- Desconto nunca excede o valor do subtotal
-- Cupom é registrado no pedido
+POST /cupons/validar – Validar cupom
 
-## 🐛 Troubleshooting
+Pedidos (Cliente):
 
-**Backend não inicia:**
-- Verifique se a porta 3000 está livre
-- Confirme que o arquivo `.env` foi criado
-- Rode `npm install` novamente
+POST /pedidos – Criar pedido
 
-**Frontend não conecta:**
-- Certifique-se que o backend está rodando
-- Verifique se não há erro no terminal do backend
-- Limpe o cache do navegador (Ctrl + Shift + R)
+GET /pedidos/meus – Meus pedidos
 
-**Erro ao calcular frete:**
-- Use CEPs válidos do Brasil (ex: 79002-073)
-- Verifique sua conexão com a internet
-- A API Positionstack tem limite de 25k requests/mês
+GET /pedidos/:id – Detalhes de um pedido
 
-## 🚀 Melhorias futuras
+Pedidos (Restaurante):
 
-Se fosse continuar o desenvolvimento, implementaria:
-- Sistema de avaliações e comentários
-- Upload real de imagens (Cloudinary/AWS S3)
-- WebSockets para atualização em tempo real
-- Painel de entregadores com mapa
-- Notificações push
-- Testes automatizados
-- Integração com gateway de pagamento
-- Relatórios e dashboards
+GET /pedidos – Todos os pedidos
 
-## 📄 Licença
+POST /pedidos/:id/avancar – Avançar status do pedido
+
+----------------------------------------------------------------------------
+
+💡 Decisões técnicas
+
+Por que SQLite?
+
+Zero configuração necessária
+
+Arquivo único, fácil de transportar
+
+Perfeito para desenvolvimento e MVP
+
+Pode ser migrado futuramente para PostgreSQL/MySQL sem grande esforço
+
+Por que Positionstack?
+
+Alternativa gratuita ao Google Maps/Mapbox
+
+Plano free com boa quantidade de requisições
+
+Não exige cartão de crédito
+
+Ótima para geocoding básico de endereços
+
+Cálculo de frete:
+
+Positionstack converte endereços em coordenadas (latitude/longitude)
+
+Fórmula de Haversine calcula distância em linha reta entre cliente e restaurante
+
+Fórmula aplicada:
+
+Frete = R$ 5,00 (taxa base) + R$ 1,00 por km
+
+----------------------------------------------------------------------------
+
+Sistema de cupons:
+
+Suporta desconto percentual ou valor fixo
+
+Validação de valor mínimo do pedido
+
+Desconto nunca excede o subtotal
+
+Cupom usado fica registrado no pedido
+
+----------------------------------------------------------------------------
+
+🐛 Troubleshooting
+
+Backend não inicia:
+
+Verifique se a porta 3000 está livre
+
+Confirme que o arquivo .env foi criado corretamente
+
+Rode npm install novamente
+
+Frontend não conecta:
+
+Certifique-se de que o backend está rodando
+
+Verifique se não há erros no terminal do backend
+
+Limpe o cache do navegador (Ctrl + Shift + R)
+
+Erro ao calcular frete:
+
+Use CEPs válidos do Brasil (por exemplo, um CEP real da sua cidade)
+
+Verifique sua conexão com a internet
+
+Lembre que a API Positionstack tem limite mensal no plano gratuito
+
+----------------------------------------------------------------------------
+
+🚀 Melhorias futuras
+
+Sistema de avaliações e comentários
+
+Upload real de imagens (Cloudinary/AWS S3)
+
+WebSockets para atualização em tempo real
+
+Painel de entregadores com mapa
+
+Notificações push
+
+Testes automatizados (unitários e de integração)
+
+Integração com gateway de pagamento
+
+Relatórios e dashboards gerenciais
+
+📄 Licença
 
 MIT
 
----
-
-**Desenvolvido para o Teste Técnico Trackland 2025**
+Desenvolvido para o Teste Técnico Trackland 2025
